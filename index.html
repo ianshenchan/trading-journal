@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3eee4">
+  <meta name="description" content="A private journal for gold (XAUUSD) trades: how many trades, and the profit or loss of each entry.">
+  <title>XAUUSD trading journal</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23231e18'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23d4b36a' stroke-width='2.4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#quick-add">Skip to quick add</a>
+  <div class="wrap">
+    <header class="site-header">
+      <div class="brand">
+        <p class="eyebrow">Gold · XAUUSD</p>
+        <h1>Trading journal</h1>
+        <p class="lede">Record how many trades you took and the profit or loss of each entry. Nothing else is stored.</p>
+      </div>
+      <div class="currency-box">
+        <label for="currency">Display currency</label>
+        <select id="currency">
+          <option value="MYR" selected>MYR — Malaysian ringgit</option>
+          <option value="USD">USD — US dollar</option>
+          <option value="EUR">EUR — Euro</option>
+          <option value="GBP">GBP — British pound</option>
+          <option value="SGD">SGD — Singapore dollar</option>
+          <option value="JPY">JPY — Japanese yen</option>
+          <option value="AUD">AUD — Australian dollar</option>
+          <option value="CUSTOM">Custom symbol</option>
+        </select>
+        <div id="custom-wrap" class="field custom-field" hidden>
+          <label for="custom-symbol">Custom symbol</label>
+          <input id="custom-symbol" type="text" maxlength="8" autocomplete="off" spellcheck="false" placeholder="RM" aria-describedby="custom-hint">
+          <p id="custom-hint" class="hint">Up to 8 characters, such as RM or kr.</p>
+        </div>
+        <p id="currency-hint" class="hint">Formatting only. Changing this does not convert amounts you already saved.</p>
+      </div>
+    </header>
+
+    <div id="storage-alert" class="alert" hidden>
+      <p id="storage-alert-text"></p>
+      <button type="button" id="start-fresh" class="btn btn-secondary" hidden>Start fresh</button>
+    </div>
+
+    <main>
+      <div class="layout">
+      <section id="quick-add" class="card" aria-labelledby="add-heading">
+        <h2 id="add-heading">Quick add</h2>
+        <form id="entry-form" autocomplete="off" novalidate>
+          <p id="editing-banner" class="banner" hidden></p>
+          <p id="form-errors" class="form-errors" role="alert" hidden></p>
+
+          <div class="field">
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" required aria-describedby="date-preview date-error">
+            <p id="date-preview" class="hint"></p>
+            <p id="date-error" class="error-text" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="trades">Number of trades</label>
+            <input id="trades" name="trades" type="text" inputmode="numeric" required autocomplete="off" placeholder="3" aria-describedby="trades-hint trades-error">
+            <p id="trades-hint" class="hint">A whole number, at least 1.</p>
+            <p id="trades-error" class="error-text" hidden></p>
+          </div>
+
+          <fieldset>
+            <legend>Profit or loss</legend>
+            <div class="segment">
+              <label class="segment-option is-profit">
+                <input type="radio" name="direction" id="dir-profit" value="profit" checked>
+                <span>Profit</span>
+              </label>
+              <label class="segment-option is-loss">
+                <input type="radio" name="direction" id="dir-loss" value="loss">
+                <span>Loss</span>
+              </label>
+            </div>
+            <div class="field">
+              <label for="amount">Amount</label>
+              <input id="amount" name="amount" type="text" inputmode="decimal" required autocomplete="off" placeholder="120.00" aria-describedby="amount-hint amount-error">
+              <p id="amount-hint" class="hint">Type a negative number, such as -45, to record a loss.</p>
+              <p id="amount-error" class="error-text" hidden></p>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <div class="label-row">
+              <label for="note">Note <span class="optional">optional</span></label>
+              <span id="note-count">0 of 140</span>
+            </div>
+            <textarea id="note" name="note" maxlength="140" rows="3" placeholder="London open, two scalps" aria-describedby="note-count note-error"></textarea>
+            <p id="note-error" class="error-text" hidden></p>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="save-btn" class="btn">Add entry</button>
+            <button type="button" id="cancel-btn" class="btn btn-secondary" hidden>Cancel</button>
+          </div>
+          <p id="form-status" class="form-status" role="status"></p>
+        </form>
+      </section>
+
+      <section id="summary" class="card" aria-labelledby="summary-heading">
+        <div class="section-head">
+          <h2 id="summary-heading">Summary</h2>
+          <p id="range-caption" class="hint"></p>
+        </div>
+        <div class="presets" role="group" aria-label="Quick ranges">
+          <button type="button" id="preset-week" class="btn btn-secondary" aria-pressed="false">This week</button>
+          <button type="button" id="preset-month" class="btn btn-secondary" aria-pressed="false">This month</button>
+          <button type="button" id="preset-all" class="btn btn-secondary" aria-pressed="false">All</button>
+        </div>
+        <p id="week-hint" class="hint">Week starts on Monday. Totals add up every entry in the range.</p>
+        <div class="range-fields">
+          <div class="field">
+            <label for="from-date">From</label>
+            <input id="from-date" type="date" aria-describedby="week-hint range-error">
+          </div>
+          <div class="field">
+            <label for="to-date">To</label>
+            <input id="to-date" type="date" aria-describedby="week-hint range-error">
+          </div>
+        </div>
+        <p id="range-error" class="error-text" role="alert" hidden></p>
+        <div id="stats" class="stats" aria-live="polite"></div>
+        <div class="daily">
+          <h3 id="daily-heading">Daily breakdown</h3>
+          <p class="hint">One row per date. Entries on the same day are summed. Days with no entries are left out.</p>
+          <p id="daily-empty" class="empty" hidden>No entries in this range.</p>
+          <div class="ledger-scroll">
+          <div class="ledger-columns days-columns" aria-hidden="true">
+            <span>Date</span>
+            <span>Trades</span>
+            <span>Profit / loss</span>
+          </div>
+          <ul id="daily-list" class="days" role="list" aria-labelledby="daily-heading"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="journal" class="card" aria-labelledby="journal-heading">
+        <div class="section-head">
+          <h2 id="journal-heading" tabindex="-1">Journal</h2>
+          <p id="journal-count" class="hint">Every saved entry, newest first.</p>
+        </div>
+        <p id="journal-empty" class="empty" hidden>No entries yet. Add the trades you took and the result above.</p>
+        <div class="ledger-scroll">
+          <div class="ledger-columns entry-columns" aria-hidden="true">
+            <span>Date</span>
+            <span>Trades</span>
+            <span>Profit / loss</span>
+            <span>Note</span>
+            <span>Actions</span>
+          </div>
+          <ul id="journal-list" class="entries" role="list" aria-labelledby="journal-heading"></ul>
+        </div>
+      </section>
+      </div>
+
+      <section id="about" class="card" aria-labelledby="about-heading">
+        <h2 id="about-heading">About your data</h2>
+        <p>Entries and the currency choice stay in this browser on this device, under the <code>localStorage</code> key <code>tradingJournal.v1</code>. They are not uploaded and they are not synced to another browser, phone, or computer.</p>
+        <p>Clearing site data or the cache deletes them. A private or incognito window starts empty, and its entries disappear when that window closes. Browsers limit this storage to about 5 MB.</p>
+        <p>Export a CSV regularly and keep that file as your backup. Opening this page as a file and opening it from a local server are different stores, so they do not share entries.</p>
+        <div class="actions backup-actions">
+          <button type="button" id="export-all" class="btn">Export all</button>
+          <button type="button" id="export-range" class="btn btn-secondary">Export this range</button>
+          <label class="btn btn-secondary file-btn">
+            Import CSV
+            <input id="import-file" type="file" accept=".csv,text/csv">
+          </label>
+        </div>
+        <p class="hint">CSV columns: date, trades, profit_loss, currency, note. Import adds rows. Amounts are not converted.</p>
+        <p id="backup-status" class="form-status" role="status"></p>
+        <p id="backup-error" class="error-text" role="alert" hidden></p>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="delete-dialog" aria-labelledby="delete-title">
+    <h2 id="delete-title">Delete this entry?</h2>
+    <p id="delete-detail"></p>
+    <p>This removes it from this browser only. It cannot be undone.</p>
+    <div class="actions dialog-actions">
+      <button type="button" id="delete-cancel" class="btn btn-secondary">Keep entry</button>
+      <button type="button" id="delete-confirm" class="btn btn-danger">Delete entry</button>
+    </div>
+  </dialog>
+
+  <noscript>
+    <p class="wrap alert">This journal needs JavaScript to save entries in this browser. Enable JavaScript and reload the page.</p>
+  </noscript>
+  <script src="app.js"></script>
+</body>
+</html>
